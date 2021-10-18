@@ -87,7 +87,17 @@ Module.register('blog-module', {
                     };
                 },
             },
+            children:{
+                products: {
+                    component: 'sas-blog-detail',
+                    path: 'products',
+                    meta: {
+                        parentPath: 'detail/:id'
+                    },
+                },
+            }
         },
+
         author: {
             path: 'author',
             component: 'sas-blog-author-list',

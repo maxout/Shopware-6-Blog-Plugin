@@ -72,6 +72,16 @@
                             {{ element.data.translated.content|raw }}
                         </div>
                     {% endblock %}
+
+                    {% block sas_blog_detail_article_blocks_products %}
+                        <div>
+                            <div class="blog-detail-cross-selling">
+                                {% sw_include '@Storefront/storefront/element/cross-selling/dynamic.html.twig' with {
+                                    crossSellings: page.extensions.dynamicCrossSelling.crossSelling
+                                } only %}
+                            </div>
+´                        </div>
+                    {% endblock %}
                 </div>
             {% endblock %}
         </article>

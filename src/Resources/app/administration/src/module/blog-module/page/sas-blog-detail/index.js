@@ -1,18 +1,19 @@
-const { Component, Mixin } = Shopware;
 import template from './sas-blog-detail.html.twig';
 import './sas-blog-detail.scss';
-
 import slugify from '@slugify';
 
+const { Component, Mixin } = Shopware;
 const Criteria = Shopware.Data.Criteria;
 const { mapPropertyErrors } = Shopware.Component.getComponentHelper();
+const ShopwareError = Shopware.Classes.ShopwareError;
+
 
 Component.register('sas-blog-detail', {
     template,
 
     inject: ['repositoryFactory', 'systemConfigApiService'],
 
-    mixins: [Mixin.getByName('notification')],
+    mixins: [Mixin.getByName('notification'),'placeholder'],
 
     metaInfo() {
         return {
@@ -28,6 +29,10 @@ Component.register('sas-blog-detail', {
                 return null;
             },
         },
+        isLoading: {
+            type: Boolean,
+            required: true,
+        }
     },
 
     data() {
@@ -41,6 +46,9 @@ Component.register('sas-blog-detail', {
             fileAccept: 'image/*',
             moduleData: this.$route.meta.$module,
             isProVersion: false,
+            productStreamFilter: null,
+            productStreamInvalid: false,
+            manualAssignedProductsCount: 0,
         };
     },
 
@@ -61,6 +69,13 @@ Component.register('sas-blog-detail', {
         },
         blogId() {
             this.createdComponent();
+        },
+        'blog.productStreamId'(id) {
+            if (!id) {
+                this.productStreamFilter = null;
+                return;
+            }
+            this.loadProductStreamPreview();
         },
     },
 
@@ -101,9 +116,98 @@ Component.register('sas-blog-detail', {
                 'slug',
                 'teaser',
                 'authorId',
-                'publishedAt'
+                'publishedAt',
+                'productStreamId',
+                'productAssignmentType',
             ]
-        )
+        ),
+
+        productStreamRepository() {
+            return this.repositoryFactory.create('product_stream');
+        },
+
+        productColumns() {
+            return [
+                {
+                    property: 'name',
+                    label: this.$tc('sw-category.base.products.columnNameLabel'),
+                    dataIndex: 'name',
+                    routerLink: 'sw.product.detail',
+                    sortable: false,
+                }, {
+                    property: 'manufacturer.name',
+                    label: this.$tc('sw-category.base.products.columnManufacturerLabel'),
+                    routerLink: 'sw.manufacturer.detail',
+                    sortable: false,
+                },
+            ];
+        },
+
+        manufacturerColumn() {
+            return 'column-manufacturer.name';
+        },
+
+        nameColumn() {
+            return 'column-name';
+        },
+
+        productCriteria() {
+            return (new Criteria(1, 10))
+                .addAssociation('options.group')
+                .addAssociation('manufacturer')
+                .addFilter(Criteria.equals('parentId', null));
+        },
+
+        productStreamInvalidError() {
+            if (this.productStreamInvalid) {
+                return new ShopwareError({
+                    code: 'PRODUCT_STREAM_INVALID',
+                    detail: this.$tc('sw-category.base.products.dynamicProductGroupInvalidMessage'),
+                });
+            }
+            return null;
+        },
+
+        productAssignmentTypes() {
+            return [
+               /* {
+                    value: 'product',
+                    label: this.$tc('sw-category.base.products.productAssignmentTypeManualLabel'),
+                },*/
+                {
+                    value: 'product_stream',
+                    label: this.$tc('sw-category.base.products.productAssignmentTypeStreamLabel'),
+                },
+            ];
+        },
+
+        dynamicProductGroupHelpText() {
+            const link = {
+                name: 'sw.product.stream.index',
+            };
+
+            const helpText = this.$tc('sw-category.base.products.dynamicProductGroupHelpText.label', 0, {
+                link: `<sw-internal-link
+                           :router-link=${JSON.stringify(link)}
+                           :inline="true">
+                           ${this.$tc('sw-category.base.products.dynamicProductGroupHelpText.linkText')}
+                       </sw-internal-link>`,
+            });
+
+            try {
+                // eslint-disable-next-line no-new
+                new URL(this.$tc('sw-category.base.products.dynamicProductGroupHelpText.videoUrl'));
+            } catch {
+                return helpText;
+            }
+
+            return `${helpText}
+                    <br>
+                    <sw-external-link
+                        href="${this.$tc('sw-category.base.products.dynamicProductGroupHelpText.videoUrl')}">
+                        ${this.$tc('sw-category.base.products.dynamicProductGroupHelpText.videoLink')}
+                    </sw-external-link>`;
+        },
     },
 
     methods: {
@@ -122,6 +226,11 @@ Component.register('sas-blog-detail', {
                 this.getPluginConfig(),
                 this.getBlog()
             ]);
+
+            if (!this.blog.productStreamId) {
+                return;
+            }
+            this.loadProductStreamPreview();
 
             this.isLoading = false;
         },
@@ -210,6 +319,21 @@ Component.register('sas-blog-detail', {
 
         openMediaSidebar() {
             this.$parent.$parent.$parent.$parent.$refs.mediaSidebarItem.openContent();
+        },
+
+        loadProductStreamPreview() {
+            this.productStreamRepository.get(this.blog.productStreamId)
+                .then((response) => {
+                    this.productStreamFilter = response.apiFilter;
+                    this.productStreamInvalid = response.invalid;
+                }).catch(() => {
+                this.productStreamFilter = null;
+                this.productStreamInvalid = true;
+            });
+        },
+
+        onPaginateManualProductAssignment(assignment) {
+            this.manualAssignedProductsCount = assignment.total;
         },
     }
 });

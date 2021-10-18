@@ -26,6 +26,10 @@
             <tag name="shopware.entity.definition"/>
         </service>
 
+        <service id="Sas\BlogModule\Content\Blog\Aggregate\ProductBlogDefinition">
+            <tag name="shopware.entity.definition"/>
+        </service>
+
         <service id="Sas\BlogModule\Content\BlogAuthor\BlogAuthorDefinition">
             <tag name="shopware.entity.definition"/>
         </service>
@@ -47,7 +51,10 @@
             <argument id="Shopware\Storefront\Page\GenericPageLoader" type="service"/>
             <argument id="Shopware\Core\Content\Cms\SalesChannel\SalesChannelCmsPageLoader" type="service"/>
             <argument id="sas_blog_entries.repository" type="service"/>
+            <argument id="product_stream.repository" type="service"/>
             <argument id="Sas\BlogModule\Page\Search\BlogSearchPageLoader" type="service"/>
+            <argument id="Shopware\Core\Content\ProductStream\Service\ProductStreamBuilder" type="service"/>
+
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

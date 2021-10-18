@@ -43,6 +43,16 @@ class BlogEntriesEntity extends Entity
     protected $author;
 
     /**
+     * @var string
+     */
+    protected $productAssignmentType;
+
+    /**
+     * @var string
+     */
+    protected $productStreamId;
+
+    /**
      * @var \DateTimeInterface
      */
     protected $publishedAt;
@@ -116,4 +126,38 @@ class BlogEntriesEntity extends Entity
     {
         $this->publishedAt = $publishedAt;
     }
+
+    /**
+     * @return string
+     */
+    public function getProductAssignmentType(): string
+    {
+        return $this->productAssignmentType;
+    }
+
+    /**
+     * @param string $productAssignmentType
+     */
+    public function setProductAssignmentType(string $productAssignmentType): void
+    {
+        $this->productAssignmentType = $productAssignmentType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductStreamId(): string
+    {
+        return $this->productStreamId;
+    }
+
+    /**
+     * @param string $productStreamId
+     */
+    public function setProductStreamId(string $productStreamId): void
+    {
+        $this->productStreamId = $productStreamId;
+    }
+
+
 }

@@ -101,6 +101,136 @@
                     {% block sas_blog_detail_card_editor_pro %}
                         {% parent() %}
                     {% endblock %}
+
+                    {% block sas_blog_detail_products %}
+                        <div class="sas_blog-detail-products">
+
+                            {% block sas_blog_detail_product_assignment %}
+                                <sw-many-to-many-assignment-card
+                                        :title="$tc('sw-category.base.products.productAssignmentHeadline')"
+                                        :local-mode="true"
+                                        :entity-collection="blog.products"
+                                        :columns="productColumns"
+                                        :is-loading="isLoading"
+                                        :criteria="productCriteria"
+                                        :select-label="$tc('sw-category.base.products.productAssignmentLabel')"
+                                        :placeholder="$tc('sw-category.base.products.productAssignmentPlaceholder')"
+                                        @paginate="onPaginateManualProductAssignment"
+                                >
+
+                                    {% block sas_blog_detail_product_assignment_type_select %}
+                                        <template #prepend-select>
+
+                                            {% block sas_blog_detail_product_assignment_type_select_field %}
+                                                <sw-single-select
+                                                        v-model="blog.productAssignmentType"
+                                                        class="sw-category-detail-products__product-assignment-type-select"
+                                                        :label="$tc('sw-category.base.products.productAssignmentTypeLabel')"
+                                                        :error="blogProductAssignmentTypeError"
+                                                        :options="productAssignmentTypes"
+                                                        show-clearable-button
+                                                />
+                                            {% endblock %}
+
+                                            {% block sas_blog_detail_product_assignment_manual_alert %}
+                                                <sw-alert
+                                                        v-if="blog.productAssignmentType === 'product_stream' && manualAssignedProductsCount > 0"
+                                                        variant="info"
+                                                >
+                                                    {{ $tc('sw-category.base.products.alertManualAssignedProductsOnAssignmentTypeStream') }}
+                                                </sw-alert>
+                                            {% endblock %}
+                                        </template>
+                                    {% endblock %}
+
+                                    {% block sas_blog_detail_product_assignment_stream_select %}
+                                        <template
+                                                v-if="blog.productAssignmentType === 'product_stream'"
+                                                #select
+                                        >
+
+                                            {% block sas_blog_detail_product_assignment_stream_select_field %}
+                                                <sw-entity-single-select
+                                                        v-model="blog.productStreamId"
+                                                        class="sw-category-detail-products__product-stream-select"
+                                                        entity="product_stream"
+                                                        show-clearable-button
+                                                        :label="$tc('sw-category.base.products.productAssignmentTypeStreamLabel')"
+                                                        :help-text="dynamicProductGroupHelpText"
+                                                        :placeholder="$tc('sw-category.base.products.productAssignmentTypeStreamPlaceholder')"
+                                                        :error="productStreamInvalidError || blogProductStreamIdError"
+                                                />
+                                            {% endblock %}
+
+                                            {% block sas_blog_detail_product_assignment_stream_preview_link %}
+                                                <div class="sw-category-detail-products__product-stream-preview-link">
+                                                    <router-link
+                                                            v-if="blog.productStreamId"
+                                                            :to="{ name: 'sw.product.stream.detail', params: { id: blog.productStreamId } }"
+                                                    >
+                                                        {{ $tc('sw-category.base.products.dynamicProductGroupDetailLinkText') }}
+                                                        <sw-icon
+                                                                name="default-arrow-simple-right"
+                                                                small
+                                                        />
+                                                    </router-link>
+                                                </div>
+                                            {% endblock %}
+                                        </template>
+                                    {% endblock %}
+
+                                    {% block sas_blog_detail_product_assignment_stream_preview_grid %}
+                                        <template
+                                                v-if="blog.productAssignmentType === 'product_stream'"
+                                                #data-grid
+                                        >
+                                            <sw-product-stream-grid-preview
+                                                    :filters="productStreamFilter"
+                                                    :columns="productColumns"
+                                            />
+                                        </template>
+                                    {% endblock %}
+
+                                    {% block sas_blog_detail_product_assignment_column_name %}
+                                        <template #[nameColumn]="{ item, column }">
+                                            <router-link
+                                                    :to="{ name: column.routerLink, params: { id: item.id } }"
+                                            >
+                                                <sw-product-variant-info :variations="item.options">
+                                                    {{ item.name || item.translated.name }}
+                                                </sw-product-variant-info>
+                                            </router-link>
+                                        </template>
+                                    {% endblock %}
+
+                                    {% block sas_blog_detail_product_assignment_column_manufacturer %}
+                                        <template #[manufacturerColumn]="{ item, column }">
+                                            <router-link
+                                                    v-if="item.manufacturerId"
+                                                    :to="{ name: column.routerLink, params: { id: item.manufacturerId } }"
+                                            >
+                                                {{ item.manufacturer.name || item.manufacturer.translated.name }}
+                                            </router-link>
+                                            <span v-else></span>
+                                        </template>
+                                    {% endblock %}
+
+                                    {% block sas_blog_detail_product_assignment_empty_state %}
+                                        <template #empty-state>
+                                            <img
+                                                    :src="'/administration/static/img/empty-states/products-empty-state.svg' | asset"
+                                                    alt=""
+                                            >
+
+                                            <p>{{ $tc('sw-category.base.products.productAssignmentEmptyStateDescription') }}</p>
+                                        </template>
+                                    {% endblock %}
+
+                                </sw-many-to-many-assignment-card>
+                            {% endblock %}
+
+                        </div>
+                    {% endblock %}
                 </div>
                 <div v-if="blog">
                     {% block sas_blog_detail_field_slug %}
@@ -142,7 +272,6 @@
                             {% endblock %}
                         </sw-card>
                     {% endblock %}
-
                     {% block sas_blog_detail_card_salutation %}
                         <sw-card>
                             {% block sas_blog_detail_field_salutation %}
@@ -217,8 +346,12 @@
                     {% endblock %}
 
                 </div>
+
             </sw-container>
+
         </template>
+
+
 
     </sw-page>
 {% endblock %}

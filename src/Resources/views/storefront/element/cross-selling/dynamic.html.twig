@@ -1,0 +1,52 @@
+    <div class="card" data-cross-selling="true">
+            <div class="product-detail-content card-body">
+                    <div class="product-detail-content-inner">
+                        {% set id = crossSellings.crossSelling.id %}
+
+                        {% if crossSellings.products %}
+                            {% set config = {
+                                'title': {
+                                    'value': crossSellings.crossSelling.name
+                                },
+                                'border': {
+                                    'value': false
+                                },
+                                'rotate': {
+                                    'value': false
+                                },
+                                'products': {
+                                    'value': crossSellings.products
+                                },
+                                'boxLayout': {
+                                    'value': 'standard'
+                                },
+                                'elMinWidth': {
+                                    'value': '300px'
+                                },
+                                'navigation': {
+                                    'value': true
+                                },
+                                'displayMode': {
+                                    'value': 'minimal'
+                                },
+                                'verticalAlign': {
+                                    'value': 'top'
+                                },
+                            } %}
+
+                            {% sw_include "@Storefront/storefront/element/cms-element-product-slider.html.twig" with {
+                                sliderConfig: config,
+                                element: {
+                                    'data': {
+                                        'products': {
+                                            elements: crossSellings.products
+                                        },
+                                        'pdpCS': 'true'
+                                    },
+                                    type: 'product-slider'
+                                }
+                            } only %}
+                        {% endif %}
+                    </div>
+            </div>
+    </div>

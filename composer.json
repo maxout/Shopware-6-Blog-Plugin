@@ -1,6 +1,6 @@
 {
     "name": "sas/blog-module",
-    "description": "Blog Module",
+    "description": "Blog Module // Extended",
     "version": "1.5.4",
     "type": "shopware-platform-plugin",
     "keywords": ["blog", "news"],
@@ -24,8 +24,8 @@
             "en-GB": "Blog Module"
         },
         "description": {
-            "de-DE": "Blog Funktion",
-            "en-GB": "Blog Functionality"
+            "de-DE": "Blog Funktion erweitert um Produkte",
+            "en-GB": "Blog Functionality extended  with products"
         },
         "manufacturerLink": {
             "en-GB": "https://shapeandshift.dev",
